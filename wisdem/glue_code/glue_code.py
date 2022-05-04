@@ -3,6 +3,7 @@ import openmdao.api as om
 
 from wisdem.rotorse.rotor import RotorSE
 from wisdem.towerse.tower import TowerSE
+from wisdem.h2.hydrogen_group import HydrogenProduction
 from wisdem.floatingse.floating import FloatingSE
 from wisdem.fixed_bottomse.jacket import JacketSE
 from wisdem.glue_code.gc_RunTools import Outputs_2_Screen
@@ -133,7 +134,7 @@ class WT_RNTA(om.Group):
             self.connect("blade.internal_structure_2d_fem.joint_position", "rotorse.re.precomp.joint_position")
             self.connect("blade.internal_structure_2d_fem.joint_mass", "rotorse.re.precomp.joint_mass")
             if modeling_options["WISDEM"]["RotorSE"]["bjs"]:
-                #self.connect("rotorse.rs.bjs.joint_mass", "rotorse.re.precomp.joint_mass")
+                # self.connect("rotorse.rs.bjs.joint_mass", "rotorse.re.precomp.joint_mass")
                 self.connect("blade.internal_structure_2d_fem.joint_bolt", "rotorse.rs.bjs.joint_bolt")
             self.connect("materials.name", "rotorse.re.precomp.mat_name")
             self.connect("materials.orth", "rotorse.re.precomp.orth")
@@ -192,9 +193,15 @@ class WT_RNTA(om.Group):
                 self.connect("blade.interp_airfoils.coord_xy_interp", "rotorse.rs.bjs.coord_xy_interp")
                 self.connect("blade.interp_airfoils.r_thick_interp", "rotorse.rs.bjs.rthick")
                 self.connect("blade.internal_structure_2d_fem.joint_position", "rotorse.rs.bjs.joint_position")
-                self.connect("blade.internal_structure_2d_fem.joint_nonmaterial_cost", "rotorse.rs.bjs.joint_nonmaterial_cost")
-                self.connect("blade.internal_structure_2d_fem.reinforcement_layer_ss", "rotorse.rs.bjs.reinforcement_layer_ss")
-                self.connect("blade.internal_structure_2d_fem.reinforcement_layer_ps", "rotorse.rs.bjs.reinforcement_layer_ps")
+                self.connect(
+                    "blade.internal_structure_2d_fem.joint_nonmaterial_cost", "rotorse.rs.bjs.joint_nonmaterial_cost"
+                )
+                self.connect(
+                    "blade.internal_structure_2d_fem.reinforcement_layer_ss", "rotorse.rs.bjs.reinforcement_layer_ss"
+                )
+                self.connect(
+                    "blade.internal_structure_2d_fem.reinforcement_layer_ps", "rotorse.rs.bjs.reinforcement_layer_ps"
+                )
                 # self.connect("blade.outer_shape_bem.thickness", "rotorse.rs.bjs.blade_thickness")
                 self.connect("blade.internal_structure_2d_fem.layer_offset_y_pa", "rotorse.rs.bjs.layer_offset_y_pa")
                 self.connect("blade.compute_coord_xy_dim.coord_xy_dim", "rotorse.rs.bjs.coord_xy_dim")
@@ -203,10 +210,9 @@ class WT_RNTA(om.Group):
                 self.connect("blade.outer_shape_bem.pitch_axis", "rotorse.rs.bjs.pitch_axis")
                 self.connect("materials.unit_cost", "rotorse.rs.bjs.unit_cost")
 
-
             # Connections to RotorCost
             if modeling_options["WISDEM"]["RotorSE"]["bjs"]:
-                 # Inputs to be split between inner and outer blade portions
+                # Inputs to be split between inner and outer blade portions
                 self.connect("blade.high_level_blade_props.blade_length", "rotorse.split.blade_length")
                 self.connect("blade.outer_shape_bem.s", "rotorse.split.s")
                 self.connect("blade.pa.chord_param", "rotorse.split.chord")
@@ -233,8 +239,13 @@ class WT_RNTA(om.Group):
                 self.connect("materials.fwf", ["rotorse.rc_in.fwf", "rotorse.rc_out.fwf"])
                 self.connect("materials.fvf", ["rotorse.rc_in.fvf", "rotorse.rc_out.fvf"])
                 self.connect("materials.roll_mass", ["rotorse.rc_in.roll_mass", "rotorse.rc_out.roll_mass"])
-                self.connect("blade.internal_structure_2d_fem.definition_layer", ["rotorse.rc_in.definition_layer", "rotorse.rc_out.definition_layer"])
-                self.connect("blade.internal_structure_2d_fem.layer_web", ["rotorse.rc_in.layer_web","rotorse.rc_out.layer_web"])
+                self.connect(
+                    "blade.internal_structure_2d_fem.definition_layer",
+                    ["rotorse.rc_in.definition_layer", "rotorse.rc_out.definition_layer"],
+                )
+                self.connect(
+                    "blade.internal_structure_2d_fem.layer_web", ["rotorse.rc_in.layer_web", "rotorse.rc_out.layer_web"]
+                )
 
             else:
                 self.connect("blade.high_level_blade_props.blade_length", "rotorse.rc.blade_length")
@@ -844,6 +855,11 @@ class WindPark(om.Group):
             self.add_subsystem(
                 "outputs_2_screen", Outputs_2_Screen(modeling_options=modeling_options, opt_options=opt_options)
             )
+
+        if modeling_options["flags"]["HydrogenProduction"]:
+            self.add_subsystem("h2", HydrogenProduction(modeling_options=modeling_options))
+            self.connect("rotorse.rp.powercurve.V_spline", "h2.V_spline")
+            self.connect("rotorse.rp.powercurve.P_spline", "h2.P_spline")
 
         # BOS inputs
         if modeling_options["WISDEM"]["BOS"]["flag"]:

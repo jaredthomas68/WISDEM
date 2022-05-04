@@ -77,38 +77,34 @@ class electrolyzer:
 
 class SimpleElectrolyzerModel(om.ExplicitComponent):
     def initialize(self):
-        self.options.declare("n_timesteps")
+        self.options.declare("n_timesteps", default=100)
 
     def setup(self):
         n_timesteps = self.options["n_timesteps"]
-        self.add_input("p_wind", size=n_timesteps)
-        self.add_input("time", size=n_timesteps)
-        self.add_output("h2_prod_rate", size=n_timesteps)
-        self.add_output("h2_produced")
+        self.add_input("p_wind", shape=n_timesteps, units="kW")
+        self.add_input("time", shape=n_timesteps, units="h")
+        self.add_output("h2_prod_rate", shape=n_timesteps, units="kg/h")
+        self.add_output("h2_produced", units="kg")
+
+        self.elec = electrolyzer()
 
     def compute(self, inputs, outputs):
-        Pdc_minus, Pdc_plus = elec.convert_ac_to_dc(inputs["p_wind"])
+        Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(inputs["p_wind"])
 
-        h2_prod_rate = elec.getH2GenRate(Pdc_plus, eff=0.7)
+        h2_prod_rate = self.elec.getH2GenRate(Pdc_plus, eff=0.7)
 
         outputs["h2_prod_rate"] = h2_prod_rate
         outputs["h2_produced"] = np.trapz(h2_prod_rate, inputs["time"])
 
 
 if __name__ == "__main__":
-    elec = electrolyzer()
+    prob = om.Problem(model=om.Group())
+    prob.model.add_subsystem("electrolyzer", SimpleElectrolyzerModel(), promotes=["*"])
 
-    p_wind = np.linspace(0.0, 15.0e3, 1001)
+    prob.setup()
+    prob["p_wind"] = np.linspace(2000.0, 4000.0, 100)
+    prob["time"] = np.linspace(0.0, 100.0, 100)
 
-    Pdc_minus, Pdc_plus = elec.convert_ac_to_dc(p_wind)
+    prob.run_model()
 
-    h2_prod_rate = elec.getH2GenRate(Pdc_plus, eff=0.7)
-
-    plt.figure()
-    plt.plot(p_wind, h2_prod_rate)
-    ax = plt.gca()
-    ax.set_xlabel("Wind power, P [kW]")
-    ax.set_ylabel("H2 production rate, kg/h")
-    ax.grid()
-
-    plt.show()
+    prob.model.list_outputs(print_arrays=True)

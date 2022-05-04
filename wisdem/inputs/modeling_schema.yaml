@@ -464,3 +464,12 @@ properties:
                                     description: Applied wind reference velocity, if necessary
                                     default: 0.0
                                     unit: meter
+            HydrogenProduction:
+                type: object
+                default: {}
+                properties:
+                    flag: *flag
+                    n_timesteps:
+                        type: integer
+                        default: 100
+                        description: Number of timesteps for the quasi-steady H2 production analysis
