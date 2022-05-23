@@ -24,7 +24,7 @@ class ReadInPower(om.ExplicitComponent):
 
         self.add_output("time", shape=self.n_timesteps, units="s")
         self.add_output("wind", shape=self.n_timesteps, units="m/s")
-        self.add_output("p_wind", shape=self.n_timesteps, units="W")
+        self.add_output("p_wind", shape=self.n_timesteps, units="kW")
 
     def compute(self, inputs, outputs):
         outputs["time"] = self.time

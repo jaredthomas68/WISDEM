@@ -18,4 +18,4 @@ prob.setup()
 
 prob.run_model()
 
-wt_opt.model.list_outputs(units=True, print_arrays=True)
+prob.model.list_outputs(units=True, print_arrays=True)
