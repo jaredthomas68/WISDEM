@@ -15,4 +15,4 @@ class SimpleWindModel(om.ExplicitComponent):
 
     def compute(self, inputs, outputs):
         n_timesteps = self.options["n_timesteps"]
-        outputs["wind"] = np.linspace(6.0, 9.0, n_timesteps) + np.random.random(n_timesteps)
+        outputs["wind"] = np.linspace(3.0, 15.0, n_timesteps)

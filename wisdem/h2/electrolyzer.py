@@ -86,15 +86,37 @@ class SimpleElectrolyzerModel(om.ExplicitComponent):
         self.add_output("h2_prod_rate", shape=n_timesteps, units="kg/h")
         self.add_output("h2_produced", units="kg")
 
+        self.n_electrolyzers = 5
+        self.elec_stack_size = 750  # kW
+        self.distribution_type = "even"  # even or full; (divided wind power
+        # evenly across electrolyzers or run as many
+        # at capacity as possible and the rest empty)
+
         self.elec = electrolyzer()
 
     def compute(self, inputs, outputs):
-        Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(inputs["p_wind"])
+        if self.distribution_type == "even":
+            # Split power evenly across all electrolyzer stacks
+            Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(inputs["p_wind"] / self.n_electrolyzers)
+            h2_prod_rate = self.elec.getH2GenRate(Pdc_plus, eff=0.7) * self.n_electrolyzers
+            outputs["h2_prod_rate"] = h2_prod_rate
 
-        h2_prod_rate = self.elec.getH2GenRate(Pdc_plus, eff=0.7)
+        elif self.distribution_type == "full":
+            p_wind = inputs["p_wind"]
+            for idx, power in enumerate(p_wind):
+                h2_prod_rate = 0.0
 
-        outputs["h2_prod_rate"] = h2_prod_rate
-        outputs["h2_produced"] = np.trapz(h2_prod_rate, inputs["time"])
+                num_stacks_at_full = power // self.elec_stack_size
+                Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(self.elec_stack_size)
+                h2_prod_rate = self.elec.getH2GenRate(Pdc_plus, eff=0.7) * num_stacks_at_full
+
+                leftover_power = power % self.elec_stack_size
+                Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(leftover_power)
+                h2_prod_rate += self.elec.getH2GenRate(Pdc_plus, eff=0.7)
+
+                outputs["h2_prod_rate"][idx] = h2_prod_rate
+
+        outputs["h2_produced"] = np.trapz(outputs["h2_prod_rate"], inputs["time"])
 
 
 if __name__ == "__main__":
