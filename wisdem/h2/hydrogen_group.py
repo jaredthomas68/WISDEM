@@ -38,4 +38,4 @@ class HydrogenProduction(om.Group):
 
             self.add_subsystem("compute_power", ComputePower(modeling_options=modeling_options), promotes=["*"])
 
-        self.add_subsystem("simple_electrolyzer", SimpleElectrolyzerModel(n_timesteps=n_timesteps), promotes=["*"])
+        self.add_subsystem("simple_electrolyzer", SimpleElectrolyzerModel(), promotes=["*"])
