@@ -76,14 +76,11 @@ class electrolyzer:
 
 
 class SimpleElectrolyzerModel(om.ExplicitComponent):
-    def initialize(self):
-        self.options.declare("n_timesteps", default=100)
-
     def setup(self):
         n_timesteps = self.options["n_timesteps"]
-        self.add_input("p_wind", shape=n_timesteps, units="kW")
-        self.add_input("time", shape=n_timesteps, units="h")
-        self.add_output("h2_prod_rate", shape=n_timesteps, units="kg/h")
+        self.add_input("p_wind", shape_by_conn=True, units="kW")
+        self.add_input("time", shape_by_conn=True, units="h")
+        self.add_output("h2_prod_rate", shape_by_conn=True, copy_shape="time", units="kg/h")
         self.add_output("h2_produced", units="kg")
 
         self.n_electrolyzers = 5
