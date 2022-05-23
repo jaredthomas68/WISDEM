@@ -1,17 +1,17 @@
 import numpy as np
 import openmdao.api as om
 
-try:
-    from weis.aeroelasticse.turbsim_file import TurbSimFile
-except:
-    raise Exception(
-        "Trying to read in a TurbSim file but WEIS is not installed. Please install WEIS to use its file processor."
-    )
-
 
 class ReadInWind(om.ExplicitComponent):
     def initialize(self):
         self.options.declare("filename")
+
+        try:
+            from weis.aeroelasticse.turbsim_file import TurbSimFile
+        except:
+            raise Exception(
+                "Trying to read in a TurbSim file but WEIS is not installed. Please install WEIS to use its file processor."
+            )
 
         out = TurbSimFile(self.options["filename"])
         iy, iz = out._iMid()

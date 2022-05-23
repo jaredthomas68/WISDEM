@@ -491,6 +491,9 @@ class PoseOptimization(object):
         elif self.opt["merit_figure"] == "inverse_design":
             wt_opt.model.add_objective("inverse_design.objective")
 
+        elif self.opt["merit_figure"] == "h2_produced":
+            wt_opt.model.add_objective("h2.h2_produced", ref=-1.0)
+
         else:
             raise ValueError("The merit figure " + self.opt["merit_figure"] + " is unknown or not supported.")
 
@@ -1176,7 +1179,9 @@ class PoseOptimization(object):
                 )
         if blade_constr["t_sc_joint"]["flag"] and self.modeling["WISDEM"]["RotorSE"]["bjs"]:
             if blade_opt["structure"]["spar_cap_ss"]["flag"] or blade_opt["structure"]["spar_cap_ps"]["flag"]:
-                wt_opt.model.add_constraint("rotorse.rs.bjs.t_sc_ratio_joint", upper=1.0)  # TODO add sparcap width and thickness. Could pack into array if upper can. Or just do two separately. Fine if they are always enforced together
+                wt_opt.model.add_constraint(
+                    "rotorse.rs.bjs.t_sc_ratio_joint", upper=1.0
+                )  # TODO add sparcap width and thickness. Could pack into array if upper can. Or just do two separately. Fine if they are always enforced together
             else:
                 print(
                     "WARNING: the ratio of joint-required to nominal spar cap thickness is enforced, but spar caps thickness is not an active design variable. The constraint is not enforced."
