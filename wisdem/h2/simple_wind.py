@@ -1,8 +1,6 @@
 import numpy as np
 import openmdao.api as om
 
-np.random.seed(314)
-
 
 class SimpleWindModel(om.ExplicitComponent):
     def initialize(self):
@@ -14,6 +12,7 @@ class SimpleWindModel(om.ExplicitComponent):
         self.add_output("wind", shape=n_timesteps, units="m/s")
 
     def compute(self, inputs, outputs):
+        np.random.seed(314)
         n_timesteps = self.options["n_timesteps"]
         outputs["time"] = np.arange(n_timesteps)
-        outputs["wind"] = np.linspace(3.0, 15.0, n_timesteps)
+        outputs["wind"] = np.random.random(n_timesteps) * 5.0 + 5.0

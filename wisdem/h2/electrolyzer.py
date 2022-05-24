@@ -30,6 +30,9 @@ class electrolyzer:
         return efficiency
 
     def convert_ac_to_dc(self, Pac):
+        """
+        @Kaz, can create a linear fit for the AC on X-axis and DC on Y-axis
+        """
         a = 0.000056676
         b = 1.046711474
         c = 18.856165577
@@ -74,6 +77,15 @@ class electrolyzer:
 
         return mflow
 
+    def calcMFRfromCurrent(self, amps, num_cells=100):
+        """
+        calculate a mass flow rate (kg/h) from the current input
+        amps - current [A]
+        num_cells - number of cells [-]; for a 750-kW stack, we had 100 cells
+        """
+        mfr = 3.63 * 10 ** (-5) * amps * num_cells
+        return mfr
+
 
 class SimpleElectrolyzerModel(om.ExplicitComponent):
     def setup(self):
@@ -82,9 +94,9 @@ class SimpleElectrolyzerModel(om.ExplicitComponent):
         self.add_output("h2_prod_rate", shape_by_conn=True, copy_shape="time", units="kg/h")
         self.add_output("h2_produced", units="kg")
 
-        self.n_electrolyzers = 5
+        self.n_electrolyzers = 5  # hardcoded for now, should actually depend on rated turbine power
         self.elec_stack_size = 750  # kW
-        self.distribution_type = "even"  # even or full; (divided wind power
+        self.distribution_type = "full"  # even or full; (divided wind power
         # evenly across electrolyzers or run as many
         # at capacity as possible and the rest empty)
 
@@ -94,8 +106,15 @@ class SimpleElectrolyzerModel(om.ExplicitComponent):
         if self.distribution_type == "even":
             # Split power evenly across all electrolyzer stacks
             Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(inputs["p_wind"] / self.n_electrolyzers)
-            h2_prod_rate = self.elec.getH2GenRate(Pdc_plus, eff=0.7) * self.n_electrolyzers
-            outputs["h2_prod_rate"] = h2_prod_rate
+
+            # create a current profile
+            # this h2_current will be sent to the physical stack
+            h2_current = elec.stack_current_from_power(Pdc_plus, 70)
+
+            # calculate a mass flow rate
+            h2_prod_rate_from_current = elec.calcMFRfromCurrent(h2_current)
+
+            outputs["h2_prod_rate"] = h2_prod_rate_from_current
 
         elif self.distribution_type == "full":
             p_wind = inputs["p_wind"]
@@ -104,13 +123,25 @@ class SimpleElectrolyzerModel(om.ExplicitComponent):
 
                 num_stacks_at_full = power // self.elec_stack_size
                 Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(self.elec_stack_size)
-                h2_prod_rate = self.elec.getH2GenRate(Pdc_plus, eff=0.7) * num_stacks_at_full
+
+                # create a current profile
+                # this h2_current will be sent to the physical stack
+                h2_current = self.elec.stack_current_from_power(Pdc_plus, 70)
+
+                # calculate a mass flow rate
+                h2_prod_rate_from_current = self.elec.calcMFRfromCurrent(h2_current) * num_stacks_at_full
 
                 leftover_power = power % self.elec_stack_size
                 Pdc_minus, Pdc_plus = self.elec.convert_ac_to_dc(leftover_power)
-                h2_prod_rate += self.elec.getH2GenRate(Pdc_plus, eff=0.7)
 
-                outputs["h2_prod_rate"][idx] = h2_prod_rate
+                # create a current profile
+                # this h2_current will be sent to the physical stack
+                h2_current = self.elec.stack_current_from_power(Pdc_plus, 70)
+
+                # calculate a mass flow rate
+                h2_prod_rate_from_current += self.elec.calcMFRfromCurrent(h2_current)
+
+                outputs["h2_prod_rate"][idx] = h2_prod_rate_from_current
 
         outputs["h2_produced"] = np.trapz(outputs["h2_prod_rate"], inputs["time"])
 

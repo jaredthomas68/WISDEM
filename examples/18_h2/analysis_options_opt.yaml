@@ -3,6 +3,10 @@ general:
     fname_output: blade_out
 
 design_variables:
+    rotor_diameter:
+        flag: True
+        minimum: 100
+        maximum: 160
     blade:
         aero_shape:
             twist:
