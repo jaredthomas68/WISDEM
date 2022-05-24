@@ -1,3 +1,9 @@
+"""
+This script reads in output from an OpenFAST .outb file and runs the simple
+electrolyzer models to obtain hydrogen production for a specific wind turbine
+and power history.
+"""
+
 import openmdao.api as om
 
 from wisdem.h2.hydrogen_group import HydrogenProduction

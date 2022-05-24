@@ -17,6 +17,11 @@ import matplotlib.pyplot as plt
 
 
 class electrolyzer:
+    """
+    This model comes from Kaz's simple electrolyzer model uploaded to
+    https://github.nrel.gov/cbay/h2atscale
+    """
+
     def __init__(self):
         pass
 
@@ -88,6 +93,14 @@ class electrolyzer:
 
 
 class SimpleElectrolyzerModel(om.ExplicitComponent):
+    """
+    This is an OpenMDAO wrapper to the simple electrolyzer model above.
+
+    It makes some assumptions about the number of electrolyzers, stack size, and
+    how to distribute electricity across the different electrolyzers. These
+    could be later made into WISDEM modeling options to allow for more user configuration.
+    """
+
     def setup(self):
         self.add_input("p_wind", shape_by_conn=True, units="kW")
         self.add_input("time", shape_by_conn=True, units="h")

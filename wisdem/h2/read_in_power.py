@@ -3,6 +3,13 @@ import openmdao.api as om
 
 
 class ReadInPower(om.ExplicitComponent):
+    """
+    Quick wrapper to read in a time, wind, and power history from a completed
+    OpenFAST run.
+
+    This requires ROSCO_toolbox to be installed, which is included within WEIS.
+    """
+
     def initialize(self):
         self.options.declare("filename")
         try:

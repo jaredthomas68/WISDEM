@@ -4,6 +4,12 @@ from scipy import interpolate
 
 
 class ComputePower(om.ExplicitComponent):
+    """
+    Simple component to receive wind speeds and powercurve data for the WISDEM
+    wind turbine. Based on these values, we produce a timeseries of power data
+    that can later be inputted into an electrolyzer model.
+    """
+
     def initialize(self):
         self.options.declare("modeling_options")
 

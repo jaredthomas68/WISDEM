@@ -1,3 +1,13 @@
+"""
+This script performs a design optimization using WISDEM that maximizes the H2
+production while varying the rotor diameter and twist of the IEA 3.4MW turine.
+
+This is meant to be an example of a simple design optimization. Many more considerations
+should be used to produce a more realistic problem, including cost information,
+aerostructural design and constraints, and some notion of a realistic time history
+instead of a randomly generated wind profile.
+"""
+
 import os
 
 import numpy as np

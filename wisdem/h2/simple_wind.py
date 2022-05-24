@@ -3,6 +3,13 @@ import openmdao.api as om
 
 
 class SimpleWindModel(om.ExplicitComponent):
+    """
+    Extremely simple 'wind model' that just outputs a random timeseries of
+    windspeeds for use when testing the electrolyzer model. This is necessary
+    because WISDEM has no notion of a time history, yet we want a low-cost
+    way to simulate electrolyzer performance.
+    """
+
     def initialize(self):
         self.options.declare("n_timesteps", default=100)
 

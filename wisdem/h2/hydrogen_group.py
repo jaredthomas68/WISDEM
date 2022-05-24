@@ -8,7 +8,16 @@ from wisdem.h2.read_in_power import ReadInPower
 
 
 class HydrogenProduction(om.Group):
-    """"""
+    """
+    This is an OpenMDAO group to combine all of the relevant H2 production components.
+
+    It has some logic based on user-set options within modeling options.
+    Specifically, it checks to see if users want to read in existing wind or
+    power files. Otherwise this uses a sort of dummy wind timeseries.
+
+    Nominally, this group could be quite modular and allow for different H2
+    production models, electrolyzers, degradation considerations, etc.
+    """
 
     def initialize(self):
         self.options.declare("modeling_options")

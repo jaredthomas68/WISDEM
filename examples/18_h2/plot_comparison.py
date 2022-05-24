@@ -1,3 +1,13 @@
+"""
+This is a naive helper script to plot some previously generated data to compare
+electrolyzer performance if you evenly distribute electricity or fill up
+individual electrolyzer stacks first.
+
+The main takeaway for these models is that it's better to fill up individual
+electrolyzer stacks instead of evenly distributing electricity, at least when
+using these simple models.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 

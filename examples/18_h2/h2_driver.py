@@ -1,3 +1,8 @@
+"""
+This performs an analysis (not an optimization) of the IEA 3.4MW turbine
+coupled to a simple H2 electrolyzer model.
+"""
+
 import os
 
 import numpy as np
