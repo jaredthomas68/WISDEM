@@ -122,10 +122,10 @@ class SimpleElectrolyzerModel(om.ExplicitComponent):
 
             # create a current profile
             # this h2_current will be sent to the physical stack
-            h2_current = elec.stack_current_from_power(Pdc_plus, 70)
+            h2_current = self.elec.stack_current_from_power(Pdc_plus, 70)
 
             # calculate a mass flow rate
-            h2_prod_rate_from_current = elec.calcMFRfromCurrent(h2_current)
+            h2_prod_rate_from_current = self.elec.calcMFRfromCurrent(h2_current)
 
             outputs["h2_prod_rate"] = h2_prod_rate_from_current
 
