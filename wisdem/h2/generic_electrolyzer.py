@@ -34,9 +34,9 @@ class electrolyzer:
 
 
         # Assumptions: TODO: update with corrected assumptions for H2@Scale project, possible allow as arguments specified during call?
-        self.n_cells = 150 # Number of cells
-        self.cell_area = 1250 # Cell area (cm^2)
-        # self.stack_rating_kW = 750 # Stack rating (kW)
+        self.n_cells = 100 # Number of cells
+        self.cell_area = 1250/self.n_cells # Cell area (cm^2)
+        self.stack_rating_kW = 750 # Stack rating (kW)
         self.stack_input_voltage = 250 # VDC 
         # self.h2_pres_out = 31 # H2 outlet pressure (bar)
 
@@ -90,43 +90,49 @@ class electrolyzer:
         # I = a * P_in ** 2 + b * T ** 2 + c * P_in * T + d * P_in + e * T + f
         # return I
 
+        # Curtail Wind Power if over electrolyzer rating:
+        # self.P_in = P_in
+        # self.P_in = np.where(self.P_in > self.stack_rating_kW,
+        #                      self.stack_rating_kW,
+        #                      self.P_in)
+        
         T_K = T + 273.15 
         # Cell reversible voltage:
-        E_rev_0 = 1.229  # Reversible cell voltage at standard state, TODO: make a function of T
-        E_th_0 = 1.481 # Thermoneutral voltage at standard state (V), TODO: make a function of T
-        p_atmo = 101325 # (Pa) atmospheric pressure / pressure of water
-        p_anode = 101325 # (Pa) pressure at anode, assumed atmo
-        p_cathode = 101325 #(Pa) pressure at cathode, assumed atmo
-        p_h2O_sat = 19946 # (Pa) @60C TODO make a function of Temp https://www.engineeringtoolbox.com/water-vapor-saturation-pressure-d_599.html?vA=60&units=C#
-        E_rev = E_rev_0 + ((self.R*T_K)/(self.n*self.F)) * (np.log(((p_anode-p_h2O_sat)/p_atmo) * math.sqrt((p_cathode-p_h2O_sat)/p_atmo)))
+        E_rev_0 = 1.229  # Reversible cell voltage at standard state, TODO: update to be f(T)?
+        E_th_0 = 1.481 # Thermoneutral voltage at standard state (V), TODO: update to be f(T)?
+        p_atmo = 101325 # (Pa) atmospheric pressure / pressure of water TODO: validate this is accurate
+        p_anode = 101325 # (Pa) pressure at anode, assumed atmo TODO: validate this is accurate
+        p_cathode = 101325 #(Pa) pressure at cathode, assumed atmo TODO: validate this is accurate
+        p_h2O_sat = 19946 # (Pa) @60C TODO: update to be f(T)? https://www.engineeringtoolbox.com/water-vapor-saturation-pressure-d_599.html?vA=60&units=C#
+        E_rev = E_rev_0 + ((self.R*T_K)/(self.n*self.F)) * (np.log(((p_anode-p_h2O_sat)/p_atmo) * math.sqrt((p_cathode-p_h2O_sat)/p_atmo))) # General Nernst equation
 
         # Activation overpotential:
         # constants below assumed from https://www.sciencedirect.com/science/article/pii/S0360319916318341?via%3Dihub 
         # TODO: update based on feedback
         T_anode = T_K # TODO: updated with realistic anode temperature?
         T_cathode = T_K # TODO: updated with realistic anode temperature?
-        alpha_a = 2 # anode charge transfer coefficient
-        alpha_c = 0.5 # cathode charge transfer coefficient
-        i_0_a = (2 * 10**(-7)) # anode exchange current density
-        i_0_c = (2 * 10**(-3)) # cathode exchange current density
-        I_in = (P_in*1000)/(self.stack_input_voltage*self.n_cells)
-        i = I_in/self.cell_area
+        alpha_a = 2 # anode charge transfer coefficient TODO: is this a realistic value?
+        alpha_c = 0.5 # cathode charge transfer coefficient TODO: is this a realistic value?
+        i_0_a = (2 * 10**(-7)) # anode exchange current density TODO: update to be f(T)?
+        i_0_c = (2 * 10**(-3)) # cathode exchange current density TODO: update to be f(T)?
+        I_in = (self.P_in*1000)/(self.stack_input_voltage*self.n_cells) # TODO: best way to calculate?
+        i = I_in/self.cell_area 
 
-        V_act_a = ((self.R*T_anode)/(alpha_a*self.F)) * np.arcsinh(i/(2*i_0_a))
-        V_act_c = ((self.R*T_cathode)/(alpha_c*self.F)) * np.arcsinh(i/(2*i_0_c))
+        V_act_a = ((self.R*T_anode)/(alpha_a*self.F)) * np.arcsinh(i/(2*i_0_a)) # derived from Butler-Volmer eqs
+        V_act_c = ((self.R*T_cathode)/(alpha_c*self.F)) * np.arcsinh(i/(2*i_0_c)) # derived from Butler-Volmer eqs
 
         # Ohmic overpotential:
         lambda_nafion = (((-2.89556 + (0.016 * T_K)) + 1.625) / 0.1875) # pulled from https://www.sciencedirect.com/science/article/pii/S0360319917309278?via%3Dihub 
-        t_nafion = 0.03 # (cm) assuming 300-µm thick membrane
+        t_nafion = 0.03 # (cm) TODO: confirm actual thickness
         sigma_nafion = (((0.005139 * lambda_nafion)-0.00326) * math.exp(1268*((1/303)-(1/T_K))))
-        R_ohmic = (t_nafion/sigma_nafion)
+        R_ohmic = (t_nafion/sigma_nafion) #TODO: update to include electron resistance?
 
         # Cell / Stack voltage:
         V_cell = (E_rev + V_act_a + V_act_c + (i*R_ohmic))
         V_stack = V_cell * self.n_cells
 
         # Stack Current
-        I = ((P_in*1000)/V_stack)
+        I = ((self.P_in*1000)/V_stack)
 
         return I 
 
