@@ -157,6 +157,8 @@ class electrolyzer:
         return n_F
 
     def electrolysis_efficiency(self):
+        #https://www.sciencedirect.com/science/article/pii/S2589299119300035#b0500
+        # Based on 1st law of thermo
         n_Th = self.E_th_0/self.V_cell # TODO: Is a valid efficiency loss? confirm should we include i*ASR in denominator?
 
         return n_Th
