@@ -119,3 +119,8 @@ Thumbs.db
 # IntelliJ Things #
 ####################
 .idea/
+
+# examples
+examples/18_h2/fill_electrolyzer_stacks_first.png
+examples/18_h2/outputs_aero/*
+examples/18_h2/reports/*

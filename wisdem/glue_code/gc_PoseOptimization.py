@@ -503,6 +503,7 @@ class PoseOptimization(object):
 
         # Set optimization design variables.
         rotorD_opt = self.opt["design_variables"]["rotor_diameter"]
+        hub_height_opt = self.opt["design_variables"]["hub_height"]
         blade_opt = self.opt["design_variables"]["blade"]
         tower_opt = self.opt["design_variables"]["tower"]
         monopile_opt = self.opt["design_variables"]["monopile"]
@@ -777,6 +778,11 @@ class PoseOptimization(object):
             )
 
         # -- Tower --
+        if hub_height_opt["flag"]:
+            wt_opt.model.add_design_var(
+                "configuration.hub_height_user", lower=hub_height_opt["minimum"], upper=hub_height_opt["maximum"], ref=80.0
+            )
+
         if tower_opt["outer_diameter"]["flag"]:
             wt_opt.model.add_design_var(
                 "tower.diameter",
