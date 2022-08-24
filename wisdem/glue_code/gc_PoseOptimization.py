@@ -511,6 +511,7 @@ class PoseOptimization(object):
         control_opt = self.opt["design_variables"]["control"]
         hub_opt = self.opt["design_variables"]["hub"]
         drive_opt = self.opt["design_variables"]["drivetrain"]
+        rated_power_opt = self.opt["design_variables"]["rated_power"]
         float_opt = self.opt["design_variables"]["floating"]
         mooring_opt = self.opt["design_variables"]["mooring"]
 
@@ -908,6 +909,10 @@ class PoseOptimization(object):
                 "control.rated_TSR", lower=control_opt["tsr"]["minimum"], upper=control_opt["tsr"]["maximum"], ref=1e1
             )
         # -- Hub & Drivetrain --
+        if rated_power_opt["flag"]:
+            wt_opt.model.add_design_var(
+                "configuration.rated_power", lower=rated_power_opt["minimum"], upper=rated_power_opt["maximum"], ref=1e-2
+            )
         if hub_opt["cone"]["flag"]:
             wt_opt.model.add_design_var(
                 "hub.cone", lower=hub_opt["cone"]["lower_bound"], upper=hub_opt["cone"]["upper_bound"], ref=1e-2
