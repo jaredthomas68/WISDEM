@@ -45,7 +45,7 @@ properties:
             hub_height:
                 type: object
                 default: {}
-                description: Adjust the hub_height by changing the blade length (scaling of other tower properties not garanteed)
+                description: Adjust the hub_height (scaling of other tower properties not garanteed)
                 properties:
                     flag: &flag
                         type: boolean
