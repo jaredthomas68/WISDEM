@@ -47,7 +47,7 @@ properties:
                 default: {}
                 description: Adjust the hub_height (scaling of other tower properties not garanteed)
                 properties:
-                    flag: &flag
+                    flag: *flag
                         type: boolean
                         default: False
                         description: Activates as a design variable or constraint
