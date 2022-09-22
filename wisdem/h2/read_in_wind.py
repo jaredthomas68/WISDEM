@@ -16,6 +16,7 @@ class ReadInWind(om.ExplicitComponent):
     def initialize(self):
         self.options.declare("filename")
 
+    def setup(self):
         try:
             from weis.aeroelasticse.turbsim_file import TurbSimFile
         except:
@@ -28,8 +29,6 @@ class ReadInWind(om.ExplicitComponent):
         self.wind = out["u"][0, :, iy, iz]
         self.time = out["t"]
         self.n_timesteps = len(self.time)
-
-    def setup(self):
         self.add_output("time", shape=self.n_timesteps, units="s")
         self.add_output("wind", shape=self.n_timesteps, units="m/s")
 

@@ -858,8 +858,10 @@ class WindPark(om.Group):
 
         if modeling_options["flags"]["HydrogenProduction"]:
             self.add_subsystem("h2", HydrogenProduction(modeling_options=modeling_options))
-            self.connect("rotorse.rp.powercurve.V_spline", "h2.V_spline")
-            self.connect("rotorse.rp.powercurve.P_spline", "h2.P_spline")
+
+            if not modeling_options["WISDEM"]["HydrogenProduction"]["read_in_power_signal"]:
+                self.connect("rotorse.rp.powercurve.V_spline", "h2.V_spline")
+                self.connect("rotorse.rp.powercurve.P_spline", "h2.P_spline")
 
         # BOS inputs
         if modeling_options["WISDEM"]["BOS"]["flag"]:

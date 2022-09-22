@@ -12,6 +12,8 @@ class ReadInPower(om.ExplicitComponent):
 
     def initialize(self):
         self.options.declare("filename")
+
+    def setup(self):
         try:
             from ROSCO_toolbox.ofTools.fast_io.output_processing import output_processing
             import ROSCO_toolbox
@@ -25,8 +27,6 @@ class ReadInPower(om.ExplicitComponent):
         self.time = fast_data["Time"]
         self.wind = fast_data["Wind1VelX"]
         self.power = fast_data["GenPwr"]
-
-    def setup(self):
         self.n_timesteps = len(self.power)
 
         self.add_output("time", shape=self.n_timesteps, units="s")
