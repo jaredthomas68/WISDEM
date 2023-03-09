@@ -48,19 +48,16 @@ properties:
                 description: Adjust the hub_height (scaling of other tower properties not garanteed)
                 properties:
                     flag: *flag
-                        type: boolean
-                        default: False
-                        description: Activates as a design variable or constraint
                     minimum:
                         type: number
-                        default: 0.
-                        minimum: 0.0
-                        maximum: 1000.0
+                        default: 50.0
+                        minimum: 1E-6
+                        maximum: 100.0
                         unit: m
                     maximum:
                         type: number
-                        default: 0.
-                        minimum: 0.0
+                        default: 150.0
+                        minimum: 10.0
                         maximum: 1000.0
                         unit: m
             blade:
@@ -306,6 +303,26 @@ properties:
                             minimum:
                                 type: number
                                 default: 0.
+                                minimum: 0.0
+                                maximum: 30.0
+                                unit: none
+                                description: Minimum allowable value
+                            maximum:
+                                type: number
+                                default: 0.
+                                minimum: 0.0
+                                maximum: 30.0
+                                unit: none
+                                description: Maximum allowable value
+                    V_in:
+                        type: object
+                        default: {}
+                        description: Adjust the cut-in speed
+                        properties:
+                            flag: *flag
+                            minimum:
+                                type: number
+                                default: 0.0
                                 minimum: 0.0
                                 maximum: 30.0
                                 unit: none
@@ -1086,7 +1103,7 @@ properties:
                             lower_bound: &hbound
                                 type: number
                                 minimum: 1e-6
-                                maximum: 10.0
+                                maximum: 500.0
                                 default: 1e-2
                                 unit: m
                             upper_bound: *hbound
