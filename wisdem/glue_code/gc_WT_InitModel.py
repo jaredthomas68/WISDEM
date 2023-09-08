@@ -711,6 +711,7 @@ def assign_hub_values(wt_opt, hub, flags):
         wt_opt["hub.clearance_hub_spinner"] = hub["clearance_hub_spinner"]
         wt_opt["hub.spin_hole_incr"] = hub["spin_hole_incr"]
         wt_opt["hub.pitch_system_scaling_factor"] = hub["pitch_system_scaling_factor"]
+        wt_opt["rotorse.wt_class.V_extreme50"] = hub["spinner_gust_ws"]
         wt_opt["hub.hub_material"] = hub["hub_material"]
         wt_opt["hub.spinner_material"] = hub["spinner_material"]
 
